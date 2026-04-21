@@ -25,17 +25,13 @@ Le code source est structuré pour maximiser la réactivité du système :
 - **Logique Non-Bloquante** : Contrairement à l'utilisation de `delay()`, l'approche par `millis()` permet au microcontrôleur de rester à l'écoute des interruptions utilisateurs (comme le bouton Reset) même pendant le décompte.
 - **Traitement Anti-rebond** : Filtrage logiciel des signaux parasites lors de l'appui sur les boutons.
 
-## 📸 Schéma et Simulation
-*(Conseil : Ajoute ici une image de ta simulation ou de ton circuit réel)*
-![Schéma du circuit](Lien_vers_ton_image_ici)
-
 ## 📂 Structure du Dépôt
 - `/src` : Contient le code source `.ino` pour Arduino.
 - `/docs` : Contient le rapport de projet complet (PDF).
 - `/img` : Captures d'écran de la simulation et photos du montage.
 
 ## ✍️ Auteurs
-- **El Mahdi Bakirou** - [Ton profil GitHub](https://github.com/ton-username)
+- **El Mahdi Bakirou** - [Ton profil GitHub](https://github.com/ajar132)
 - **Ziad Elyousfi**
 
 ---

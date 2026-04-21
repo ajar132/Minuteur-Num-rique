@@ -1,0 +1,124 @@
+#include &lt;Wire.h&gt; // Bibliothèque pour la communication I2C
+#include &lt;LiquidCrystal_I2C.h&gt; // Bibliothèque pour gérer un écran LCD via I2C
+
+LiquidCrystal_I2C lcd(0x27, 16, 2); // Initialisation de l&#39;écran LCD à l&#39;adresse I2C 0x27, 16 colonnes, 2
+lignes
+
+// Définition des broches utilisées
+const int buttonMin = 2; // Bouton pour ajouter une minute
+const int buttonSec = 3; // Bouton pour ajouter une seconde
+const int buttonStartPause = 4; // Bouton pour démarrer ou mettre en pause le minuteur
+const int buttonReset = 5; // Bouton pour réinitialiser le minuteur
+const int buzzer = 8; // Buzzer pour signal sonore
+
+// Variables de temps
+int minutes = 0;
+int seconds = 0;
+bool isRunning = false; // Indique si le minuteur est en marche
+unsigned long previousMillis = 0; // Stocke le dernier temps système (pour le timer)
+
+// Variables pour gérer les appuis sur les boutons (anti-rebond)
+bool minPressed = false;
+bool secPressed = false;
+bool startPausePressed = false;
+bool resetPressed = false;
+
+void setup() {
+lcd.init(); // Initialisation de l&#39;écran LCD
+lcd.backlight(); // Activation du rétroéclairage de l&#39;écran
+
+// Configuration des broches en entrée avec résistance pull-up interne
+pinMode(buttonMin, INPUT_PULLUP);
+pinMode(buttonSec, INPUT_PULLUP);
+pinMode(buttonStartPause, INPUT_PULLUP);
+pinMode(buttonReset, INPUT_PULLUP);
+pinMode(buzzer, OUTPUT); // Buzzer en sortie
+
+// Message d&#39;accueil pendant 3 secondes
+lcd.setCursor(0, 0);
+lcd.print(&quot;Projet Minuteur&quot;);
+delay(3000);
+lcd.clear(); // Efface l&#39;écran après l&#39;affichage
+}
+
+void loop() {
+// Affichage du temps restant formaté MM:SS
+lcd.setCursor(0, 0);
+lcd.print(&quot;Temps restants: &quot;);
+lcd.setCursor(0, 1);
+
+if (minutes &lt; 10) lcd.print(&quot;0&quot;); // Affiche 0 devant les minutes &lt; 10
+lcd.print(minutes);
+lcd.print(&quot;:&quot;);
+if (seconds &lt; 10) lcd.print(&quot;0&quot;); // Affiche 0 devant les secondes &lt; 10
+lcd.print(seconds);
+
+lcd.print(&quot; &quot;); // Espace pour effacer les anciens caractères
+
+// Gestion du bouton &quot;ajouter minute&quot;
+if (digitalRead(buttonMin) == LOW &amp;&amp; !isRunning &amp;&amp; !minPressed) {
+minutes++;
+if (minutes &gt; 99) minutes = 0; // Remise à zéro si &gt; 99 minutes
+minPressed = true;
+delay(300); // Anti-rebond
+}
+if (digitalRead(buttonMin) == HIGH) {
+minPressed = false;
+}
+
+// Gestion du bouton &quot;ajouter seconde&quot;
+if (digitalRead(buttonSec) == LOW &amp;&amp; !secPressed &amp;&amp; !isRunning) {
+seconds++;
+if (seconds &gt; 59) seconds = 0; // Remise à zéro si &gt; 59 secondes
+secPressed = true;
+delay(200); // Anti-rebond
+}
+if (digitalRead(buttonSec) == HIGH) {
+secPressed = false;
+}
+
+// Gestion du bouton &quot;start/pause&quot;
+if (digitalRead(buttonStartPause) == LOW &amp;&amp; !startPausePressed) {
+isRunning = !isRunning; // Bascule entre marche et pause
+startPausePressed = true;
+delay(300); // Anti-rebond
+
+}
+if (digitalRead(buttonStartPause) == HIGH) {
+startPausePressed = false;
+}
+
+// Gestion du bouton &quot;reset&quot;
+if (digitalRead(buttonReset) == LOW &amp;&amp; !resetPressed) {
+minutes = 0;
+seconds = 0;
+isRunning = false;
+resetPressed = true;
+delay(300); // Anti-rebond
+}
+if (digitalRead(buttonReset) == HIGH) {
+resetPressed = false;
+}
+
+// Décrémentation du temps chaque seconde
+if (isRunning &amp;&amp; millis() - previousMillis &gt;= 1000) {
+previousMillis = millis(); // Mise à jour du temps de référence
+
+if (minutes == 0 &amp;&amp; seconds == 0) {
+// Temps écoulé : arrêter le minuteur et activer le buzzer
+isRunning = false;
+tone(buzzer, 1000, 1000); // Sonnerie à 1 kHz pendant 1 seconde
+} else {
+// Décrémentation normale
+if (seconds == 0) {
+if (minutes &gt; 0) {
+
+minutes--;
+seconds = 59;
+}
+} else {
+seconds--;
+}
+}
+}
+}
